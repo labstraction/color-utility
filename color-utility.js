@@ -4,7 +4,7 @@
  * @param opacity - The opacity of the color.
  * @returns The hex color with the alpha value applied.
  */
-export function setAlpha(hexColor, opacity) {
+export function setAlpha(hexColor, opacity){
   var _opacity = Math.round(Math.min(Math.max(opacity || 1, 0), 1) * 255);
   return hexColor + _opacity.toString(16).toUpperCase();
 }
@@ -14,7 +14,7 @@ export function setAlpha(hexColor, opacity) {
  * @param colorString - The color string to convert to an RGBA string.
  * @returns The RGBA values of the color.
  */
-export function fromColorStringToRGBA(colorString) {
+export function fromColorStringToRGBA(colorString){
   if (document) {
     const canvas = document.createElement("canvas");
     canvas.height = 1;
@@ -42,7 +42,7 @@ export function fromColorStringToRGBA(colorString) {
  * @param hexColor - The hex value of the color you want to analyze.
  * @returns a string.
  */
-export function getContrastingColor(hexColor) {
+export function getContrastingColor(hexColor){
   if (hex.indexOf("#") === 0) {
     hex = hex.slice(1);
   }

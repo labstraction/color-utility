@@ -1,6 +1,6 @@
 {
   "name": "@labstraction/color-utility",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "just a little color utility library for web dev",
   "main": "color-utility.js",
   "scripts": {
