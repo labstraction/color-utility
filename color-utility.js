@@ -4,58 +4,85 @@
  * @param opacity - The opacity of the color.
  * @returns The hex color with the alpha value applied.
  */
-export function setAlpha(hexColor, opacity){
-  var _opacity = Math.round(Math.min(Math.max(opacity || 1, 0), 1) * 255);
-  return hexColor + _opacity.toString(16).toUpperCase();
+export function setAlphaToHex(colorHex, alpha=1) {
+  var alphaHex = Math.round(clamp(alpha, 0, 1) * 255);
+  return colorHex + alphaHex.toString(16).toUpperCase();
+}
+
+function clamp(value, min, max) {
+  return Math.min(Math.max(value, min), max);
 }
 
 /**
- * Convert a color string to an rgba or rgb string
- * @param colorString - The color string to convert to an RGBA string.
- * @returns The RGBA values of the color.
+ * Given a color name, return the hex value of that color (Works only on browsers)
+ * @param colorName - The name of the color you want to convert to hex.
+ * @returns A string
  */
-export function fromColorStringToRGBA(colorString){
-  if (document) {
-    const canvas = document.createElement("canvas");
-    canvas.height = 1;
-    canvas.width = 1;
-    const ctx = canvas.getContext("2d");
-    ctx.fillStyle = color;
-    ctx.fillRect(0, 0, 1, 1);
-    return ctx.getImageData(0, 0, 1, 1).data;
+export function fromColorNameToHex(colorName) {
+  try {
+    const ctx = document.createElement("canvas").getContext("2d");
+    ctx.fillStyle = colorName;
+    return ctx.fillStyle
+  } catch (e) { 
+    throw new Error("Can't get color from name without a document");
+  }
+}
+
+/**
+ * Given an array of four numbers, return a string representing the color in RGBA format
+ * @param rgba - an array of four numbers, each between 0 and 255, representing the red, green, blue,
+ * and alpha values of the color.
+ * @returns A string.
+ */
+export function toRGBAString(rgba) {
+  return "rgba(" + rgba[0] + ", " + rgba[1] + ", " + rgba[2] + ", " + rgba[3] + ")";
+}
+
+/**
+ * Given a color in hex format, convert it to an array of RGBA values
+ * @param colorHex - the hexadecimal color code, e.g. #FFF or #FFFFFF
+ * @returns An array of four numbers.
+ */
+export function fromColorHexToRGBA(colorHex) {
+  let hexCode = colorHex.replace("#", "");
+  hexCode = hexCode.length === 3 ? hexCode.split("").map(c => c + c).join("") : hexCode;
+  if (hexCode.length === 6 || hexCode.length === 8) {
+    var aRgbHex = hexCode.match(/.{1,2}/g);
+    var aRgba = [
+      parseInt(aRgbHex[0], 16),
+      parseInt(aRgbHex[1], 16),
+      parseInt(aRgbHex[2], 16),
+      roundTo((parseInt((aRgbHex[3] || 'ff'), 16) / 255), 2)
+    ];
+    return aRgba;
   } else {
-    const r = parseInt(colorString.slice(1, 3), 16);
-    const g = parseInt(colorString.slice(3, 5), 16);
-    const b = parseInt(colorString.slice(5, 7), 16);
-    const alpha = parseInt(colorString.slice(7, 9), 16);
-
-    if (alpha) {
-      return "rgba(" + r + ", " + g + ", " + b + ", " + alpha + ")";
-    } else {
-      return "rgb(" + r + ", " + g + ", " + b + ")";
-    }
+    throw new Error("Invalid color hex code");
   }
 }
+
+function roundTo(value, precision) {
+  var multiplier = Math.pow(10, precision || 0);
+  return Math.round(value * multiplier) / multiplier;
+}
+
 
 /**
- * Given a hex color, return the color that would be a better contrast
- * @param hexColor - The hex value of the color you want to analyze.
- * @returns a string.
+ * Given a color in hex format, return the color that contrasts with it
+ * @param colorHex - the color in hex format
+ * @returns The contrasting color is being returned.
  */
-export function getContrastingColor(hexColor){
-  if (hex.indexOf("#") === 0) {
-    hex = hex.slice(1);
-  }
-  // convert 3-digit hex to 6-digits.
-  if (hex.length === 3) {
-    hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
-  }
-  if (hex.length !== 6) {
-    throw new Error("Invalid HEX color.");
-  }
-  var r = parseInt(hex.slice(0, 2), 16),
-    g = parseInt(hex.slice(2, 4), 16),
-    b = parseInt(hex.slice(4, 6), 16);
-
-  return r * 0.299 + g * 0.587 + b * 0.114 > 186 ? "#000000" : "#FFFFFF";
+export function contrastingColor(colorHex, applyAlpha = false) {
+  return (luma(colorHex, applyAlpha) >= 165) ? '#000000' : '#ffffff';
 }
+
+
+/**
+ * Given a color in hex format, return the luma of that color
+ * @param colorHex - the hexadecimal value of the color you want to analyze.
+ * @returns The luma value of the color.
+ */
+export function luma(colorHex, applyAlpha = false) {
+  const rgba = fromColorHexToRGBA(colorHex, applyAlpha);
+  return roundTo((((0.2126 * rgba[0]) + (0.7152 * rgba[1]) + (0.0722 * rgba[2])) * (applyAlpha ? rgba[3] : 1)), 2);
+}
+

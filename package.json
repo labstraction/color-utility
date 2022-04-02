@@ -1,6 +1,6 @@
 {
   "name": "@labstraction/color-utility",
-  "version": "1.0.5",
+  "version": "1.0.7",
   "description": "just a little color utility library for web dev",
   "main": "color-utility.js",
   "scripts": {
@@ -19,5 +19,6 @@
   "devDependencies": {
     "jsdoc": "^3.6.10",
     "jsdoc-to-markdown": "^7.1.1"
-  }
+  },
+  "type": "module"
 }
